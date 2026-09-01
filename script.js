@@ -12,6 +12,9 @@
       const extra=document.createElement('script');
       extra.src='gallery-enhance.js';
       document.body.appendChild(extra);
+      const footer=document.createElement('script');
+      footer.src='footer-settings.js?v=20260901-1';
+      document.body.appendChild(footer);
     };
     document.body.appendChild(core);
   };
