@@ -1,0 +1,32 @@
+(()=>{
+'use strict';
+const KEY='libraryGuidanceCMSv2';
+const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const icon=`<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="10" width="32" height="28" rx="4"/><circle cx="18" cy="19" r="3"/><path d="m12 33 8-8 6 6 4-4 6 6"/><path class="accent" d="M35 7v5M32.5 9.5h5"/></svg>`;
+function ensureOutcomeResource(){
+ const cms=read(); if(!Array.isArray(cms.resources))return;
+ if(cms.resources.some(r=>String(r.title||'').includes('活動成果')))return;
+ cms.resources.splice(1,0,{id:Date.now(),title:'活動成果',category:'活動成果',desc:'研習活動花絮與成果分享',url:'#outcomes',icon:'◉',home:true});
+ try{localStorage.setItem(KEY,JSON.stringify(cms))}catch{}
+}
+function renderResourceCards(){
+ const strip=document.querySelector('.feature-strip');if(!strip)return;
+ const cms=read(),base=Array.isArray(cms.resources)?cms.resources:[];
+ const resources=[...base];
+ if(!resources.some(r=>String(r.title||'').includes('活動成果')))resources.splice(1,0,{title:'活動成果',desc:'研習活動花絮與成果分享',url:'#outcomes',home:true});
+ const palettes=['f-mint','f-pink','f-lilac','f-yellow','f-blue'];
+ const iconFor=t=>String(t).includes('活動成果')?icon:null;
+ const coreIcon=(title)=>{const el=document.createElement('span');el.textContent=title.includes('AI')?'AI':title.includes('研習')?'▣':title.includes('法規')?'§':'冊';return el.innerHTML};
+ strip.innerHTML=resources.filter(r=>r.home!==false).slice(0,5).map((r,i)=>`<a class="feature-card ${palettes[i]}" href="${esc(r.url||'#resources')}"><span class="feature-icon feature-icon-svg">${iconFor(r.title)||coreIcon(String(r.title||''))}</span><div><h3>${esc(r.title)}</h3><p>${esc(r.desc||'')}</p></div><b class="card-arrow">→</b></a>`).join('');
+}
+function renderGalleryLinks(){
+ const gallery=document.querySelector('.gallery');if(!gallery)return;
+ const cms=read(),items=Array.isArray(cms.gallery)?cms.gallery.filter(g=>g.home!==false).slice(0,3):[];
+ if(!items.length)return;
+ gallery.innerHTML=items.map(g=>`<figure><a class="outcome-card-link" href="outcome.html?id=${encodeURIComponent(g.id)}"><div class="photo"><img src="${esc(g.image||'')}" alt="${esc(g.title||'活動成果')}" loading="lazy"></div><figcaption><span>${esc(g.title||'活動成果')}</span><b>查看活動 →</b></figcaption></a></figure>`).join('');
+ const more=document.querySelector('#outcomes .section-head a');if(more)more.href='#outcomes';
+}
+function run(){ensureOutcomeResource();setTimeout(()=>{renderResourceCards();renderGalleryLinks()},120)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+})();
