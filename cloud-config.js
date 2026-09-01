@@ -7,6 +7,9 @@ window.LibraryGuidanceCloudConfig={
     messagingSenderId:"1011777526571",
     appId:"1:1011777526571:web:e5e76bfdfde1bec45d8836e"
   },
+  githubMedia:{
+    workerUrl:""
+  },
   r2:{
     workerUrl:"",
     publicBaseUrl:""
