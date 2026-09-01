@@ -9,6 +9,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .hero-grid{grid-template-columns:.88fr 1.12fr;gap:26px}
+    .hero-illustration{height:470px;border-radius:30px;overflow:hidden;box-shadow:0 18px 45px rgba(53,90,108,.10);background:#eef9f6}
+    .hero-illustration .hero-image{width:100%;height:100%;display:block;object-fit:cover;object-position:62% center;transform:scale(1.08);transition:transform .45s ease}
+    .hero-illustration:hover .hero-image{transform:scale(1.11)}
+    @media(max-width:1050px){.hero-grid{grid-template-columns:1fr}.hero-illustration{height:420px}.hero-illustration .hero-image{object-position:60% center;transform:scale(1.03)}}
+    @media(max-width:720px){.hero-illustration{height:310px;border-radius:22px}.hero-illustration .hero-image{object-position:66% center;transform:scale(1.08)}}
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -37,14 +45,8 @@
           <p class="lead">串聯全國高中職圖書館專業能量，<br>推動閱讀素養、AI應用與多元學習。</p>
           <div class="hero-actions"><a class="btn primary" href="#about">認識輔導團 <span>→</span></a><a class="btn ghost" href="#events">近期活動 <span>→</span></a></div>
         </div>
-        <div class="hero-illustration" aria-label="閱讀、科技與教育主題插畫">
-          <div class="bubble bulb">☀</div><div class="bubble ai">AI</div><div class="bubble wifi">⌁</div><div class="bubble openbook">冊</div>
-          <div class="plant plant-left"><i></i><i></i><i></i><i></i></div>
-          <div class="book-stack"><span class="book b1"></span><span class="book b2"></span><span class="book b3"></span><span class="book b4"></span><span class="book b5"></span></div>
-          <div class="reader reader-top"><span class="head"></span><span class="body"></span><span class="reading-book"></span></div>
-          <div class="ladder"></div>
-          <div class="reader reader-side"><span class="head"></span><span class="body"></span><span class="reading-book"></span></div>
-          <div class="plant plant-right"><i></i><i></i><i></i><i></i></div>
+        <div class="hero-illustration" aria-label="閱讀、科技與教育主題主視覺">
+          <img class="hero-image" src="images/hero-library-ai.png" alt="明亮現代圖書館中，學生結合書籍、平板與筆電進行學習的主視覺" />
         </div>
       </div>
     </section>
