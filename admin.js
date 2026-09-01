@@ -36,7 +36,7 @@ function toast(msg){const t=$('#toast');if(!t)return;t.textContent=msg;t.classLi
 function addLog(action){state.logs.unshift({time:new Date().toLocaleString('zh-TW',{hour12:false}),action});state.logs=state.logs.slice(0,100)}
 function setView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));const map={dashboard:'總覽',news:'最新消息管理',events:'活動研習管理',resources:'資源中心管理',gallery:'活動成果管理',links:'相關連結管理',users:'帳號與權限',logs:'操作紀錄',settings:'網站設定'};$('#pageTitle').textContent=map[name]||'後台管理';if(innerWidth<821)$('#sidebar')?.classList.remove('open');if(name==='logs')renderLogs()}
 $$('.nav-btn').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));$$('[data-goto]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.goto)));$('#mobileToggle')?.addEventListener('click',()=>$('#sidebar')?.classList.toggle('open'));
-function updateStats(){$('#statNews').textContent=state.news.length;$('#statEvents').textContent=state.events.length;$('#statResources').textContent=state.resources.length;$('#statGallery').textContent=state.gallery.length}
+function updateStats(){$('#statNews').textContent=state.news.length;$('#statEvents').textContent=state.events.length;$('#statResources').textContent=state.resources.length;$('#statGallery').textContent=state.gallery.length;renderDataHealth()}
 function rowBtns(type,id){return `<div class="row-actions"><button class="icon-action" data-edit-${type}="${id}">編輯</button><button class="icon-action" data-delete-${type}="${id}">刪除</button></div>`}
 function renderNews(){const q=($('#newsAdminSearch')?.value||'').trim().toLowerCase();const arr=state.news.filter(n=>`${n.date} ${n.cat} ${n.title} ${n.desc||''}`.toLowerCase().includes(q));$('#newsTableBody').innerHTML=arr.map(n=>`<tr><td>${esc(n.date)}</td><td><span class="badge ${n.cat==='重要公告'?'important':''}">${esc(n.cat)}</span></td><td>${esc(n.title)}</td><td>${n.draft?'草稿':'已發布'}</td><td>${rowBtns('news',n.id)}</td></tr>`).join('')}
 function renderEvents(){$('#eventTableBody').innerHTML=[...state.events].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<tr><td>${esc(e.region)}</td><td>${esc(e.date)}</td><td>${esc(e.title)}</td><td>${esc(e.place)}</td><td>${rowBtns('event',e.id)}</td></tr>`).join('')}
@@ -63,3 +63,28 @@ $('#clearLogs')?.addEventListener('click',()=>{state.logs=[];persist();renderLog
 $('#demoLogout')?.addEventListener('click',e=>{e.preventDefault();toast('正式登入完成後才會啟用登出功能')});
 function renderAll(){renderNews();renderEvents();renderResources();renderGallery();renderLinks();updateStats();loadSettings()}
 renderAll();persist();
+
+// --- CMS V3：資料備份、匯入、還原與健康檢查 ---
+function ensureDataTools(){
+ const dashboard=document.querySelector('.view[data-view="dashboard"]');
+ if(!dashboard||document.getElementById('dataToolsPanel'))return;
+ const panel=document.createElement('div');panel.className='panel';panel.id='dataToolsPanel';
+ panel.innerHTML=`<div class="panel-head"><div><h3>資料備份與搬移</h3><p style="margin:5px 0 0;color:#718491;font-size:12px">目前資料儲存在這台裝置的瀏覽器。正式 Firebase 上線前，可先使用 JSON 備份避免資料遺失。</p></div><span class="status-pill">本機 CMS</span></div><div class="cms-tool-grid"><div class="cms-tool-card"><b>匯出備份</b><p>將公告、活動、資源、成果、連結及網站設定下載為 JSON。</p><button class="secondary-btn" id="exportCmsData" type="button">下載備份檔</button></div><div class="cms-tool-card"><b>匯入備份</b><p>從另一台電腦匯入先前下載的 JSON 資料。</p><input id="importCmsFile" type="file" accept="application/json,.json" hidden><button class="secondary-btn" id="importCmsData" type="button">選擇備份檔</button></div><div class="cms-tool-card danger-zone"><b>還原示範資料</b><p>清除目前本機修改，恢復網站預設內容。</p><button class="danger-btn" id="resetCmsData" type="button">還原預設資料</button></div></div><div id="dataHealth" class="data-health"></div>`;
+ dashboard.appendChild(panel);
+ document.getElementById('exportCmsData')?.addEventListener('click',exportCmsData);
+ document.getElementById('importCmsData')?.addEventListener('click',()=>document.getElementById('importCmsFile')?.click());
+ document.getElementById('importCmsFile')?.addEventListener('change',importCmsData);
+ document.getElementById('resetCmsData')?.addEventListener('click',resetCmsData);
+ renderDataHealth();
+}
+function exportCmsData(){
+ const payload={version:3,exportedAt:new Date().toISOString(),data:state};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`library-guidance-cms-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();URL.revokeObjectURL(a.href);a.remove();addLog('匯出網站資料備份');persist();toast('備份檔已下載');
+}
+function validImportedData(v){return v&&typeof v==='object'&&Array.isArray(v.news)&&Array.isArray(v.events)&&Array.isArray(v.resources)&&Array.isArray(v.gallery)&&Array.isArray(v.links)&&v.settings&&typeof v.settings==='object'}
+function importCmsData(e){const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);const data=parsed.data||parsed;if(!validImportedData(data))throw new Error('格式不符');if(!confirm('匯入後會取代目前這台瀏覽器中的後台資料，確定繼續？'))return;state={...clone(defaults),...data};addLog(`匯入資料備份：${file.name}`);persist();renderAll();renderLogs();renderDataHealth();toast('備份資料已匯入')}catch{alert('無法匯入：這不是有效的網站後台備份檔。')}finally{e.target.value=''}};reader.readAsText(file,'utf-8')}
+function resetCmsData(){if(!confirm('確定要清除目前本機修改，並還原為網站預設資料嗎？此動作無法復原，建議先下載備份。'))return;state=clone(defaults);addLog('還原網站預設資料');persist();renderAll();renderLogs();renderDataHealth();toast('已還原預設資料')}
+function renderDataHealth(){const el=document.getElementById('dataHealth');if(!el)return;const missing=[];state.news.filter(n=>!n.draft&&!n.title).length&&missing.push('公告標題');state.events.filter(e=>!e.date||!e.title||!e.place).length&&missing.push('活動必要欄位');state.gallery.filter(g=>g.home&&!g.image).length&&missing.push('首頁成果圖片');state.links.filter(l=>l.home&&!/^https?:\/\//.test(l.url||'')).length&&missing.push('首頁外部連結');const bytes=new Blob([JSON.stringify(state)]).size;el.innerHTML=`<div><b>${missing.length?'⚠ 資料需要檢查':'✓ 資料狀態正常'}</b><span>${missing.length?`請檢查：${missing.join('、')}`:'主要內容欄位完整，可繼續編輯。'}</span></div><div><b>${(bytes/1024).toFixed(1)} KB</b><span>目前本機 CMS 資料量</span></div><div><b>${state.logs.length}</b><span>已記錄操作筆數</span></div>`}
+function addImagePathPreviews(){[['eventForm','image'],['galleryForm','image']].forEach(([formId,name])=>{const f=document.getElementById(formId),input=f?.elements[name];if(!input||input.dataset.previewBound)return;input.dataset.previewBound='1';const preview=document.createElement('div');preview.className='path-preview';input.insertAdjacentElement('afterend',preview);const update=()=>{const src=input.value.trim();preview.innerHTML=src?`<div class="path-preview-box"><img src="${esc(src)}" alt="圖片路徑預覽" onerror="this.parentElement.classList.add('broken')"><span>${esc(src)}</span></div>`:''};input.addEventListener('input',update);input.addEventListener('change',update);update()})}
+ensureDataTools();addImagePathPreviews();renderDataHealth();
