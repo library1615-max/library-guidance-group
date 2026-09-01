@@ -1,9 +1,11 @@
 window.LibraryGuidanceCloudConfig={
   firebase:{
-    apiKey:"",
-    authDomain:"",
-    projectId:"",
-    appId:""
+    apiKey:"AIzaSyBmqCkruGKTEpmsSMfQD0yGv-PBTTyk034",
+    authDomain:"library-guidance-group.firebaseapp.com",
+    projectId:"library-guidance-group",
+    storageBucket:"library-guidance-group.firebasestorage.app",
+    messagingSenderId:"1011777526571",
+    appId:"1:1011777526571:web:e5e76bfdfde1bec45d8836e"
   },
   r2:{
     workerUrl:"",
