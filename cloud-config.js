@@ -1,0 +1,12 @@
+window.LibraryGuidanceCloudConfig={
+  firebase:{
+    apiKey:"",
+    authDomain:"",
+    projectId:"",
+    appId:""
+  },
+  r2:{
+    workerUrl:"",
+    publicBaseUrl:""
+  }
+};
