@@ -1,14 +1,14 @@
 const newsData=[
- {date:'2026-09-01',cat:'重要公告',tag:'important',title:'114年度全國高級中等學校圖書館輔導團研習開放報名',desc:'中區、南區、北區場次資訊與報名連結。',url:'https://www.shs.edu.tw/'},
- {date:'2026-08-28',cat:'研習活動',tag:'',title:'AI時代圖書館創新應用研習－中區場次資訊',desc:'研習日期：9/03｜國立中興大學圖書館。',url:'#events'},
+ {date:'2026-09-01',cat:'重要公告',tag:'important',title:'115年度全國高級中等學校圖書館輔導團研習開放報名',desc:'中區、北區、南區場次資訊與報名連結。',url:'https://www.shs.edu.tw/'},
+ {date:'2026-08-28',cat:'研習活動',tag:'',title:'AI時代圖書館創新應用研習－中區場次資訊',desc:'研習日期：9/04｜國立中興大學圖書館6樓會議廳。',url:'#events'},
  {date:'2026-08-21',cat:'閱讀推廣',tag:'',title:'2026全國閱讀推廣教師研習－活動花絮',desc:'精彩課程與活動照片已上傳，歡迎瀏覽。',url:'#outcomes'},
- {date:'2026-08-15',cat:'小論文',tag:'paper',title:'114學年度全國高級中等學校小論文寫作比賽資訊',desc:'競賽與投稿資訊請依中學生網站公告為準。',url:'https://www.shs.edu.tw/'},
+ {date:'2026-08-15',cat:'小論文',tag:'paper',title:'115學年度全國高級中等學校小論文寫作比賽資訊',desc:'競賽與投稿資訊請依中學生網站公告為準。',url:'https://www.shs.edu.tw/'},
  {date:'2026-08-08',cat:'AI與數位應用',tag:'ai',title:'生成式AI在圖書館服務的應用與實踐',desc:'研習教材與簡報已上傳至資源中心。',url:'#resources'}
 ];
 const events=[
- {region:'中區',day:'03',month:'SEP',cls:'',image:'images/event-central-workshop.png',title:'AI時代圖書館創新應用研習',place:'國立中興大學｜圖書館6樓會議廳'},
- {region:'南區',day:'12',month:'SEP',cls:'south',image:'images/event-south-workshop.png',title:'閱讀素養與多元文本教學研習',place:'國立成功大學｜圖書館總館B1會議廳'},
- {region:'北區',day:'25',month:'SEP',cls:'north',image:'images/event-north-workshop.png',title:'小論文寫作與格式輔導實作研習',place:'國立陽明交通大學｜浩然圖書資訊中心'}
+ {region:'中區',day:'04',month:'SEP',cls:'',image:'images/event-central-workshop.png',title:'AI時代圖書館創新應用研習',place:'國立中興大學｜圖書館6樓會議廳'},
+ {region:'南區',day:'22',month:'SEP',cls:'south',image:'images/event-south-workshop.png',title:'閱讀素養與多元文本教學研習',place:'國立成功大學｜圖書館總館B1會議廳'},
+ {region:'北區',day:'11',month:'SEP',cls:'north',image:'images/event-north-workshop.png',title:'小論文寫作與格式輔導實作研習',place:'國立陽明交通大學｜浩然圖書資訊中心B1國際會議廳'}
 ];
 const list=document.querySelector('#newsList'), search=document.querySelector('#newsSearch'), filters=document.querySelector('#newsFilters'), empty=document.querySelector('#emptyNews');
 let active='all';
@@ -27,8 +27,10 @@ const galleryItems=[
 document.querySelectorAll('.gallery figure').forEach((figure,i)=>{const item=galleryItems[i];if(!item)return;const photo=figure.querySelector('.photo');if(photo)photo.innerHTML=`<img src="${item[0]}" alt="${item[1]}" loading="lazy">`;});
 const imageStyles=document.createElement('style');
 imageStyles.textContent=`
-.hero-illustration{height:auto!important;min-height:430px;display:flex;align-items:center;justify-content:center}
-.hero-main-image{width:100%;height:auto;max-height:520px;object-fit:contain;display:block;border-radius:28px;filter:drop-shadow(0 18px 30px rgba(45,105,112,.08))}
+/* Hero image blends into the page instead of looking like a separate card. */
+.hero-grid{grid-template-columns:.82fr 1.18fr!important;gap:0!important}
+.hero-illustration{height:520px!important;min-height:0!important;display:flex;align-items:center;justify-content:center;overflow:visible!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;margin-left:-38px;position:relative}
+.hero-main-image{width:118%;height:100%;max-height:none!important;object-fit:cover;object-position:58% center;display:block;border-radius:0!important;filter:none!important;transform:none!important;-webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.18) 5%,rgba(0,0,0,.72) 13%,#000 22%,#000 100%);mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.18) 5%,rgba(0,0,0,.72) 13%,#000 22%,#000 100%)}
 .event-cover{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
 .event-cover:before,.event-cover:after{display:none!important}
 .event-cover .region{box-shadow:0 4px 12px rgba(20,65,70,.12)}
@@ -36,7 +38,8 @@ imageStyles.textContent=`
 .gallery .photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}
 .gallery figure:hover .photo img{transform:scale(1.025)}
 .gallery .photo>span{display:none!important}
-@media(max-width:900px){.hero-illustration{min-height:0}.hero-main-image{max-height:none;border-radius:20px}}
+@media(max-width:1050px){.hero-grid{grid-template-columns:1fr!important}.hero-illustration{height:430px!important;margin-left:0}.hero-main-image{width:100%;object-position:63% center;-webkit-mask-image:none;mask-image:none;border-radius:24px!important}}
+@media(max-width:720px){.hero-illustration{height:310px!important}.hero-main-image{object-position:67% center;border-radius:18px!important}}
 `;
 document.head.appendChild(imageStyles);
 
