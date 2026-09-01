@@ -1,1 +1,71 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>網站後台登入｜圖書館輔導團</title><link rel="stylesheet" href="styles.css"><style>body{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#f8f3e9,#dceced)}.login{width:min(440px,calc(100% - 32px));background:white;border-radius:20px;padding:34px;box-shadow:var(--shadow)}.login h1{font-family:"Noto Serif TC",serif;color:var(--navy);font-size:28px;margin:0 0 8px}.login p{color:var(--muted);font-size:13px}.login label{display:block;font-size:13px;font-weight:700;margin:18px 0 6px}.login input{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit}.login button{width:100%;margin-top:22px;height:46px;border:0;border-radius:10px;background:var(--navy);color:white;font-weight:700}.notice{margin-top:18px;background:#f6f1e6;padding:12px;border-radius:10px;font-size:12px;color:#786a50}.back{display:inline-block;margin-top:18px;color:var(--teal);text-decoration:none;font-size:13px}</style></head><body><div class="login"><h1>網站後台登入</h1><p>此頁目前為介面原型，正式帳號、權限與資料庫會在後台階段接上。</p><label>帳號</label><input placeholder="請輸入管理帳號"><label>密碼</label><input type="password" placeholder="請輸入密碼"><button type="button" onclick="alert('目前為後台介面原型，尚未啟用正式登入。')">登入</button><div class="notice">🔐 正式版將加入管理員／編輯者權限、公告發布、活動卡片、附件上傳、外部網址與操作紀錄。</div><a class="back" href="index.html">← 返回首頁</a></div></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>網站後台管理｜全國高級中等學校圖書館輔導團</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-brand"><span class="brand-mark" aria-hidden="true"></span><div><strong>圖書館輔導團<br>網站後台</strong><small>Content Management</small></div></div>
+      <nav class="side-nav" aria-label="後台功能">
+        <button class="nav-btn active" data-view="dashboard">⌂ 總覽</button>
+        <button class="nav-btn" data-view="news">▤ 最新消息</button>
+        <button class="nav-btn" data-view="events">▣ 活動研習</button>
+        <button class="nav-btn" data-view="resources">冊 資源中心</button>
+        <button class="nav-btn" data-view="gallery">◉ 活動成果</button>
+        <button class="nav-btn" data-view="links">↗ 相關連結</button>
+        <button class="nav-btn" data-view="users">◎ 帳號與權限</button>
+        <button class="nav-btn" data-view="logs">≡ 操作紀錄</button>
+        <button class="nav-btn" data-view="settings">⚙ 網站設定</button>
+      </nav>
+      <div class="side-foot"><a href="index.html">← 查看前台網站</a><a href="#">登出</a></div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="mobile-toggle" id="mobileToggle" type="button">☰</button><h2 id="pageTitle">總覽</h2></div><div class="top-actions"><span class="status-pill">展示模式</span><span class="avatar">管</span></div></header>
+      <div class="content">
+        <section class="view active" data-view="dashboard">
+          <div class="page-head"><div><h1>網站內容總覽</h1><p>快速掌握公告、活動、資源與網站維護狀態。</p></div><button class="primary-btn" type="button" onclick="document.querySelector('[data-view=news]').click()">＋ 新增公告</button></div>
+          <div class="cards"><div class="stat-card"><span>最新消息</span><b>5</b><small>目前示範資料</small></div><div class="stat-card"><span>近期活動</span><b>3</b><small>中、北、南區</small></div><div class="stat-card"><span>資源分類</span><b>5</b><small>可持續擴充</small></div><div class="stat-card"><span>活動成果</span><b>3</b><small>首頁展示中</small></div></div>
+          <div class="panel"><div class="panel-head"><h3>目前優先事項</h3><span class="status-pill">V2</span></div><div class="log-list"><div class="log-item"><time>今日</time><div><b>首頁視覺</b><br>Hero、三區活動與活動成果圖片已完成。</div></div><div class="log-item"><time>下一階段</time><div><b>正式資料串接</b><br>待接 Firebase Authentication、Firestore 與 Storage。</div></div><div class="log-item"><time>安全原則</time><div><b>帳號密碼不寫入 GitHub</b><br>正式登入改由雲端驗證服務處理。</div></div></div></div>
+        </section>
+
+        <section class="view" data-view="news">
+          <div class="page-head"><div><h1>最新消息管理</h1><p>新增公告、外部網址、Google 表單、附件與置頂資訊。</p></div></div>
+          <div class="editor-grid">
+            <form class="form-card" id="newsForm"><div class="field"><label>公告標題</label><input name="title" required placeholder="例如：115年度圖書館輔導團研習開放報名"></div><div class="field"><label>分類</label><select name="cat"><option>重要公告</option><option>研習活動</option><option>閱讀推廣</option><option>小論文</option><option>AI與數位應用</option><option>其他</option></select></div><div class="field"><label>發布日期</label><input name="date" type="date" required></div><div class="field"><label>公告內容</label><textarea name="content" placeholder="輸入公告內容，可於正式版使用富文字編輯器。"></textarea></div><div class="field"><label>點擊後前往</label><select name="linkType"><option>公告內頁</option><option>外部網站</option><option>Google 表單</option><option>附件 PDF</option></select></div><div class="field"><label>連結網址</label><input name="url" type="url" placeholder="https://"></div><div class="upload-box">拖曳或選擇附件／封面圖片<br><small>正式版將串接雲端檔案儲存空間</small></div><div class="check-row"><label><input type="checkbox" name="pin"> 首頁置頂</label><label><input type="checkbox" name="important"> 設為重要公告</label><label><input type="checkbox" name="draft"> 儲存為草稿</label></div><button class="primary-btn" type="submit">儲存公告</button></form>
+            <div><div class="preview-card"><h4>公告預覽</h4><p>正式版可在發布前預覽桌機與手機版效果。</p></div><div class="panel"><div class="panel-head"><h3>發布規則</h3></div><p style="font-size:12px;color:#718491;line-height:1.8">可選擇公告內頁、外部網站、Google 表單或 PDF。若填入外部連結，前台點擊公告即可直接前往指定頁面。</p></div></div>
+          </div>
+          <div class="panel"><div class="panel-head"><h3>公告清單</h3><div class="toolbar"><input class="search-input" placeholder="搜尋公告…"><button class="secondary-btn">年度篩選</button></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>日期</th><th>分類</th><th>標題</th><th>狀態</th><th>操作</th></tr></thead><tbody id="newsTableBody"></tbody></table></div></div>
+        </section>
+
+        <section class="view" data-view="events">
+          <div class="page-head"><div><h1>活動研習管理</h1><p>管理中區、北區、南區活動卡片與報名連結。</p></div></div>
+          <div class="editor-grid"><form class="form-card" id="eventForm"><div class="field"><label>區域</label><select name="region"><option>中區</option><option>北區</option><option>南區</option></select></div><div class="field"><label>活動日期</label><input name="date" type="date" required></div><div class="field"><label>活動名稱</label><input name="title" required></div><div class="field"><label>地點</label><input name="place" required></div><div class="field"><label>報名／活動網址</label><input name="url" type="url" placeholder="https://"></div><div class="upload-box">活動卡片圖片上傳區</div><div class="check-row"><label><input type="checkbox" checked> 顯示於首頁近期活動</label></div><button class="primary-btn" type="submit">儲存活動</button></form><div class="preview-card"><h4>首頁活動卡片預覽</h4><p>正式版會依區域套用不同柔和色彩，並自動顯示日期、地點與「了解活動」按鈕。</p></div></div>
+          <div class="panel"><div class="panel-head"><h3>活動清單</h3></div><div class="table-wrap"><table class="data-table"><thead><tr><th>區域</th><th>日期</th><th>名稱</th><th>地點</th><th>操作</th></tr></thead><tbody id="eventTableBody"></tbody></table></div></div>
+        </section>
+
+        <section class="view" data-view="resources"><div class="page-head"><div><h1>資源中心</h1><p>建立可長期累積與搜尋的全國高中職圖書館專業資源庫。</p></div><button class="primary-btn" data-save-demo>＋ 新增資源</button></div><div class="settings-grid"><div class="settings-card"><h3>專題資源</h3><p>閱讀素養、館務經營、教學工具等專業資料。</p></div><div class="settings-card"><h3>AI應用專區</h3><p>AI與圖書館服務、資訊素養及教學應用。</p></div><div class="settings-card"><h3>研習教材</h3><p>簡報、講義、教案與研習下載資料。</p></div><div class="settings-card"><h3>法規政策</h3><p>圖書館相關法規、政策與行政文件。</p></div></div></section>
+
+        <section class="view" data-view="gallery"><div class="page-head"><div><h1>活動成果</h1><p>上傳活動照片、成果摘要與相關檔案。</p></div><button class="primary-btn" data-save-demo>＋ 新增成果</button></div><div class="settings-grid"><div class="settings-card"><h3>圖片管理</h3><p>支援封面圖、多張活動照片與排序設定。</p></div><div class="settings-card"><h3>成果內容</h3><p>活動名稱、日期、摘要、講義與相關連結。</p></div></div></section>
+
+        <section class="view" data-view="links"><div class="page-head"><div><h1>相關連結</h1><p>管理首頁固定入口與其他重要教育平台。</p></div><button class="primary-btn" data-save-demo>＋ 新增連結</button></div><div class="panel"><div class="table-wrap"><table class="data-table"><thead><tr><th>名稱</th><th>網址</th><th>首頁顯示</th><th>排序</th><th>操作</th></tr></thead><tbody><tr><td>中學生網站</td><td>https://www.shs.edu.tw/</td><td>是</td><td>1</td><td><button class="icon-action">編輯</button></td></tr><tr><td>高中職小論文檢核輔助系統</td><td>library1615-max.github.io/thesis-format-system/</td><td>是</td><td>2</td><td><button class="icon-action">編輯</button></td></tr></tbody></table></div></div></section>
+
+        <section class="view" data-view="users"><div class="page-head"><div><h1>帳號與權限</h1><p>正式版支援管理員、編輯者與權限分級。</p></div><button class="primary-btn" data-save-demo>＋ 新增使用者</button></div><div class="settings-grid"><div class="settings-card"><h3>系統管理員</h3><p>網站設定、帳號管理、發布、修改與刪除所有內容。</p></div><div class="settings-card"><h3>網站編輯者</h3><p>新增與編輯公告、活動、資源及成果，不可管理帳號。</p></div></div></section>
+
+        <section class="view" data-view="logs"><div class="page-head"><div><h1>操作紀錄</h1><p>追蹤誰在何時新增、修改或刪除網站內容。</p></div></div><div class="panel"><div class="log-list"><div class="log-item"><time>2026-09-01 12:30</time><div><b>系統</b>｜完成後台 V1 介面建置</div></div><div class="log-item"><time>2026-09-01 12:10</time><div><b>管理者</b>｜更新首頁活動圖片</div></div><div class="log-item"><time>2026-09-01 11:50</time><div><b>管理者</b>｜更新首頁 Hero 圖片</div></div></div></div></section>
+
+        <section class="view" data-view="settings"><div class="page-head"><div><h1>網站設定</h1><p>管理網站名稱、首頁文字、SEO、聯絡資訊與顯示設定。</p></div><button class="primary-btn" data-save-demo>儲存設定</button></div><div class="settings-grid"><div class="settings-card"><h3>基本資料</h3><div class="field"><label>網站名稱</label><input value="全國高級中等學校圖書館輔導團"></div><div class="field"><label>首頁標語</label><input value="共創圖書館的未來"></div></div><div class="settings-card"><h3>搜尋與分享</h3><div class="field"><label>SEO 描述</label><textarea>全國高級中等學校圖書館輔導團官方網站，提供研習、閱讀素養、AI應用與圖書館專業資源。</textarea></div></div><div class="settings-card"><h3>聯絡資訊</h3><p>可於正式版加入承辦單位、電話、Email 與地址。</p></div><div class="settings-card"><h3>首頁區塊</h3><p>可控制最新消息、近期活動、資源、活動成果與相關連結是否顯示。</p></div></div></section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="admin.js"></script>
+</body>
+</html>
