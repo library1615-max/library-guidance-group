@@ -8,7 +8,7 @@ window.LibraryGuidanceCloudConfig={
     appId:"1:1011777526571:web:e5e76bfdfde1bec45d8836e"
   },
   githubMedia:{
-    workerUrl:""
+    appsScriptUrl:"https://script.google.com/macros/s/AKfycbzTDOm_XC94kyh1Lr720fHgkGV4P4Qac95n5JxJWXH2GSy_McJHI3vZL6Kaai3XbkWiMg/exec"
   },
   r2:{
     workerUrl:"",
