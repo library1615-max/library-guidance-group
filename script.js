@@ -15,6 +15,9 @@
       const footer=document.createElement('script');
       footer.src='footer-settings.js?v=20260901-1';
       document.body.appendChild(footer);
+      const eventLinks=document.createElement('script');
+      eventLinks.src='event-links-115.js?v=20260902-1';
+      document.body.appendChild(eventLinks);
     };
     document.body.appendChild(core);
   };
