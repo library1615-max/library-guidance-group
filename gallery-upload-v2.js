@@ -4,6 +4,9 @@ const $=(s,p=document)=>p.querySelector(s);
 const cfg=()=>window.LibraryGuidanceCloudConfig?.githubMedia||{};
 const MAX_FILE=10*1024*1024;
 const MAX_BATCH=60;
+const SEND_GROUP=4;
+const SEND_GAP=2200;
+const GROUP_PAUSE=5000;
 const ACCEPT='image/jpeg,image/png,image/webp';
 const REPO='library1615-max/library-guidance-group';
 const API_BASE=`https://api.github.com/repos/${REPO}/contents/images/gallery`;
@@ -20,16 +23,25 @@ async function compress(file){
   const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.84));
   return new File([blob],file.name.replace(/\.[^.]+$/,'.jpg'),{type:'image/jpeg'});
 }
-function ensurePostFrame(){let f=$('#galleryUploadBridge');if(f)return f;f=document.createElement('iframe');f.id='galleryUploadBridge';f.name='galleryUploadBridge';f.title='圖片上傳服務';f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px';document.body.appendChild(f);return f}
+function createPostFrame(requestId){
+  const name=`galleryUpload_${requestId}`;
+  const f=document.createElement('iframe');
+  f.id=name;f.name=name;f.title='圖片上傳服務';f.setAttribute('aria-hidden','true');
+  f.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px';
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),90000);
+  return name;
+}
 async function submitToAppsScript(file,date){
   if(!configured())throw new Error('UPLOAD_NOT_CONFIGURED');
   const user=window.LibraryGuidanceCloud?.auth?.currentUser;if(!user)throw new Error('AUTH_REQUIRED');
   const token=await user.getIdToken();const f=await compress(file);const dataUrl=await fileToDataURL(f);const base64=String(dataUrl).split(',')[1]||'';
-  ensurePostFrame();const requestId='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-  const post=document.createElement('form');post.method='POST';post.action=cfg().appsScriptUrl;post.target='galleryUploadBridge';post.style.display='none';
+  const requestId='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  const target=createPostFrame(requestId);
+  const post=document.createElement('form');post.method='POST';post.action=cfg().appsScriptUrl;post.target=target;post.style.display='none';
   const fields={requestId,idToken:token,base64,mimeType:f.type,fileName:f.name,date};
   Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=String(v??'');post.appendChild(input)});
-  document.body.appendChild(post);post.submit();setTimeout(()=>post.remove(),3000);
+  document.body.appendChild(post);post.submit();setTimeout(()=>post.remove(),4000);
 }
 async function listGalleryFiles(date){
   const res=await fetch(`${API_BASE}/${encodeURIComponent(date)}?ref=main&_=${Date.now()}`,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
@@ -41,7 +53,7 @@ async function listGalleryFiles(date){
 }
 async function waitForBatch(date,before,count,status){
   const baseline=new Set(before);
-  const deadline=Date.now()+180000;
+  const deadline=Date.now()+300000;
   let lastCount=-1;
   while(Date.now()<deadline){
     await sleep(5000);
@@ -57,9 +69,9 @@ function savePayload(form,paths){const d=new FormData(form);const payload={id:d.
 function init(){
   const form=$('#galleryForm');if(!form||$('#galleryMediaPicker'))return;
   const image=form.elements.image;if(!image)return;image.required=false;image.removeAttribute('required');const old=image.closest('.field');if(old)old.style.display='none';
-  const photos=form.elements.photos?.closest('.field');if(photos)photos.style.display='none';ensurePostFrame();
+  const photos=form.elements.photos?.closest('.field');if(photos)photos.style.display='none';
   const box=document.createElement('section');box.id='galleryMediaPicker';box.className='gallery-media-picker';
-  box.innerHTML=`<div class="media-title"><div><strong>活動照片</strong><p>可一次上傳大量活動照片；第一張自動作為封面。</p></div><span>最多 ${MAX_BATCH} 張</span></div><div class="media-service-ready"><strong>✓ 大量照片批次確認模式已啟用</strong><p>新版會先把整批照片送出，再一次確認 GitHub 新增的圖片，不會每張都卡在等待 commit。</p></div><label class="media-drop"><input id="galleryFiles" type="file" accept="${ACCEPT}" multiple><b>＋ 選擇照片</b><span>可一次選取多張 JPG、PNG、WebP</span></label><div id="galleryMediaStatus" class="media-status">尚未選擇照片</div><div id="galleryThumbs" class="media-thumbs"></div><div class="media-help">大量上傳流程：①記錄目前 GitHub 圖片 → ②逐張送出 → ③整批確認新增圖片 → ④寫入成果與 Firestore。</div>`;
+  box.innerHTML=`<div class="media-title"><div><strong>活動照片</strong><p>可一次上傳大量活動照片；第一張自動作為封面。</p></div><span>最多 ${MAX_BATCH} 張</span></div><div class="media-service-ready"><strong>✓ 穩定大量照片模式已啟用</strong><p>每張照片使用獨立上傳通道，並分組節流送出，避免同一個 iframe 互相中斷前一張上傳。</p></div><label class="media-drop"><input id="galleryFiles" type="file" accept="${ACCEPT}" multiple><b>＋ 選擇照片</b><span>可一次選取多張 JPG、PNG、WebP</span></label><div id="galleryMediaStatus" class="media-status">尚未選擇照片</div><div id="galleryThumbs" class="media-thumbs"></div><div class="media-help">大量上傳流程：①記錄 GitHub → ②每 ${SEND_GROUP} 張為一組穩定送出 → ③整批確認 → ④寫入成果與 Firestore。</div>`;
   old?.after(box);
   let selected=[],confirmed=0;
   const input=$('#galleryFiles'),thumbs=$('#galleryThumbs'),status=$('#galleryMediaStatus');
@@ -81,7 +93,8 @@ function init(){
         if(submit)submit.textContent=`送出 ${i+1}/${selected.length}`;
         status.textContent=`② 正在送出第 ${i+1}/${selected.length} 張照片…`;
         await submitToAppsScript(selected[i],date);
-        await sleep(1300);
+        await sleep(SEND_GAP);
+        if((i+1)%SEND_GROUP===0 && i+1<selected.length){status.textContent=`② 已送出 ${i+1}/${selected.length} 張，讓伺服器處理這一組…`;await sleep(GROUP_PAUSE)}
       }
       status.textContent=`③ ${selected.length} 張已送出，正在整批確認 GitHub 圖片…`;
       const paths=await waitForBatch(date,before,selected.length,status);
@@ -95,7 +108,7 @@ function init(){
       setTimeout(()=>{form.dataset.uploadStage='';render()},5000);
     }catch(err){
       form.dataset.mediaUploading='0';form.dataset.uploadStage='';if(submit){submit.disabled=false;submit.textContent=original}
-      const map={AUTH_REQUIRED:'請先登入管理員帳號。',UPLOAD_NOT_CONFIGURED:'安全上傳網址尚未設定。',GITHUB_BATCH_TIMEOUT:'整批照片已送出，但 3 分鐘內仍未全部出現在 GitHub。請先不要重複上傳，稍後重新整理後確認成果。',GITHUB_RATE_LIMIT:'GitHub 公開查詢暫時達到頻率上限，請稍後再試。',GITHUB_CHECK_FAILED:'目前無法讀取 GitHub 圖片清單，請稍後再試。',CMS_SAVE_FAILED:'照片已全部建立，但成果資料寫入 CMS 失敗。'};
+      const map={AUTH_REQUIRED:'請先登入管理員帳號。',UPLOAD_NOT_CONFIGURED:'安全上傳網址尚未設定。',GITHUB_BATCH_TIMEOUT:'整批照片已送出，但 5 分鐘內仍未全部出現在 GitHub。請先不要重複上傳；稍後可重新整理確認。',GITHUB_RATE_LIMIT:'GitHub 公開查詢暫時達到頻率上限，請稍後再試。',GITHUB_CHECK_FAILED:'目前無法讀取 GitHub 圖片清單，請稍後再試。',CMS_SAVE_FAILED:'照片已全部建立，但成果資料寫入 CMS 失敗。'};
       status.textContent=`⚠ ${map[err.message]||err.message}`;console.error('Gallery bulk upload failed',err);render();
     }
   },true);
