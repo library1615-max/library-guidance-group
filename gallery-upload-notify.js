@@ -1,0 +1,21 @@
+(()=>{
+'use strict';
+const $=(s,p=document)=>p.querySelector(s);
+function addStyles(){if(document.getElementById('galleryNotifyStyles'))return;const s=document.createElement('style');s.id='galleryNotifyStyles';s.textContent=`
+.gallery-upload-overlay{position:fixed;inset:0;z-index:9999;background:rgba(24,47,56,.38);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px}
+.gallery-upload-modal{width:min(460px,100%);background:#fff;border-radius:24px;padding:26px;box-shadow:0 28px 90px rgba(26,62,75,.24);text-align:center}
+.gallery-upload-modal .icon{width:68px;height:68px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#e8f8f3;color:#16826f;font-size:36px;font-weight:900}
+.gallery-upload-modal h2{margin:0 0 10px;color:#17384f;font-size:24px}.gallery-upload-modal p{margin:0;color:#647d88;line-height:1.8;font-size:14px}
+.gallery-upload-modal .actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}.gallery-upload-modal button,.gallery-upload-modal a{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+.gallery-upload-modal .primary{background:#229b84;color:#fff}.gallery-upload-modal .secondary{background:#eef5f4;color:#355763}
+.gallery-upload-live{position:sticky;bottom:12px;z-index:20;margin-top:12px;border-radius:14px;padding:12px 14px;background:#fff8e8;border:1px solid #f1d996;color:#76591d;font-size:13px;line-height:1.6;box-shadow:0 10px 28px rgba(98,77,31,.08)}
+.gallery-upload-live.success{background:#ebfaf5;border-color:#b9e8d8;color:#166b5d}
+`;document.head.appendChild(s)}
+function showSuccess(count){document.getElementById('galleryUploadSuccessModal')?.remove();const o=document.createElement('div');o.id='galleryUploadSuccessModal';o.className='gallery-upload-overlay';o.innerHTML=`<div class="gallery-upload-modal" role="dialog" aria-modal="true" aria-labelledby="galleryUploadSuccessTitle"><div class="icon">✓</div><h2 id="galleryUploadSuccessTitle">上傳完成，可以離開此畫面</h2><p>${count?`共 ${count} 張照片`: '照片'}與活動成果資料都已成功儲存。<br>系統也已送交 Firestore 同步；現在可以安全離開或前往前台查看。</p><div class="actions"><button type="button" class="secondary" id="galleryStayBtn">留在後台</button><a class="primary" href="outcomes.html" target="_blank" rel="noopener">查看成果專區</a></div></div>`;document.body.appendChild(o);$('#galleryStayBtn',o)?.addEventListener('click',()=>o.remove())}
+function init(){addStyles();const form=$('#galleryForm');if(!form)return;let lastStatus='';let selectedCount=0;const live=document.createElement('div');live.className='gallery-upload-live';live.hidden=true;form.appendChild(live);
+const update=()=>{const status=$('#galleryMediaStatus')?.textContent?.trim()||'';if(status===lastStatus)return;lastStatus=status;if(!status)return;const m=status.match(/(?:已選擇|已完成)\s*(\d+)\s*\/\s*(\d+)/);if(m)selectedCount=Number(m[2]);const picker=$('#galleryMediaPicker');if(picker&&selectedCount===0){const t=picker.textContent.match(/已選擇\s*(\d+)\s*張/);if(t)selectedCount=Number(t[1])}if(status.startsWith('①')||status.startsWith('②')||status.startsWith('③')||status.startsWith('④')){live.hidden=false;live.classList.remove('success');live.innerHTML=`<b>照片正在處理中，請先不要關閉或重新整理頁面。</b><br>${status}`}else if(status.startsWith('✓ 全部照片與成果資料已成功儲存')){live.hidden=false;live.classList.add('success');live.innerHTML='<b>✓ 上傳完成，可以安全離開此畫面。</b><br>活動成果已儲存並送交 Firestore 同步。';showSuccess(selectedCount)}else if(status.startsWith('⚠')){live.hidden=false;live.classList.remove('success');live.innerHTML=`<b>目前尚未完成，請先不要離開。</b><br>${status}`}};
+const obs=new MutationObserver(update);const start=()=>{const s=$('#galleryMediaStatus');if(s){obs.observe(s,{childList:true,subtree:true,characterData:true});update()}else setTimeout(start,200)};start();
+window.addEventListener('beforeunload',e=>{if(form.dataset.mediaUploading==='1'){e.preventDefault();e.returnValue=''}});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,500));else setTimeout(init,500);
+})();
