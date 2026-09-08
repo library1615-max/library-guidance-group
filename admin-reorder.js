@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+if(window.__adminReorderLoaded)return;window.__adminReorderLoaded=true;
 const configs=[
  {key:'news',tbody:'newsTableBody',edit:'news',pinned:true,label:'公告'},
  {key:'events',tbody:'eventTableBody',edit:'event',pinned:false,label:'活動'},
