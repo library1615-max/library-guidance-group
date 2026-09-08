@@ -18,6 +18,9 @@
       const eventLinks=document.createElement('script');
       eventLinks.src='event-links-115.js?v=20260902-1';
       document.body.appendChild(eventLinks);
+      const ordering=document.createElement('script');
+      ordering.src='public-order.js?v=20260908-1';
+      document.body.appendChild(ordering);
     };
     document.body.appendChild(core);
   };
